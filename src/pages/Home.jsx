@@ -1,5 +1,19 @@
+import { Suspense } from "react";
+import LatestProducts from "../components/LatestProducts";
+
 const Home = () => {
-  return <div className="text-secondary">This is home page</div>;
+  const latestProductsPromise = fetch(
+    "http://localhost:3000/latest-products"
+  ).then((res) => res.json());
+  return (
+    <div className="text-secondary">
+      <Suspense fallback={"/loading..."}>
+        <LatestProducts
+          latestProductsPromise={latestProductsPromise}
+        ></LatestProducts>
+      </Suspense>
+    </div>
+  );
 };
 
 export default Home;
