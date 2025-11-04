@@ -7,6 +7,7 @@ import CreateProducts from "../pages/CreateProducts";
 import Home from "../pages/Home";
 import MyBids from "../pages/MyBids";
 import MyProducts from "../pages/MyProducts";
+import PrivateRoutes from "./PrivateRoutes";
 
 const router = createBrowserRouter([
   {
@@ -23,15 +24,27 @@ const router = createBrowserRouter([
       },
       {
         path: "/my-products",
-        element: <MyProducts></MyProducts>,
+        element: (
+          <PrivateRoutes>
+            <MyProducts></MyProducts>
+          </PrivateRoutes>
+        ),
       },
       {
         path: "/my-bids",
-        element: <MyBids></MyBids>,
+        element: (
+          <PrivateRoutes>
+            <MyBids></MyBids>
+          </PrivateRoutes>
+        ),
       },
       {
         path: "/create-product",
-        element: <CreateProducts></CreateProducts>,
+        element: (
+          <PrivateRoutes>
+            <CreateProducts></CreateProducts>
+          </PrivateRoutes>
+        ),
       },
       {
         path: "/auth/login",
