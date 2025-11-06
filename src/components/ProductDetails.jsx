@@ -1,16 +1,25 @@
-import { useContext, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useLoaderData } from "react-router";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import AuthContext from "../contexts/AuthContext";
 
 const ProductDetails = () => {
   const productDetails = useLoaderData();
   const { _id: productId } = productDetails;
+  const [bids, setBids] = useState([]);
   const bidModalRef = useRef(null);
   const { user } = useContext(AuthContext);
   const handleModalOpen = () => {
     bidModalRef.current.showModal();
   };
+  useEffect(() => {
+    fetch(`http://localhost:3000/products/bids/${productId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setBids(data);
+      });
+  }, [productId]);
 
   const handleBidSubmit = (e) => {
     e.preventDefault();
@@ -21,6 +30,7 @@ const ProductDetails = () => {
       product_id: productId,
       bidder_name: name,
       bidder_email: email,
+      bidder_image: user?.photoURL,
       bid_amount: bid,
       status: "pending",
     };
@@ -35,10 +45,19 @@ const ProductDetails = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.insertedId) {
-          toast.success("Your bid placed successfully");
           bidModalRef.current.close();
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "Your bid has been placed",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          const updatedBidCollection = [...bids, newBid];
+          updatedBidCollection.sort((a, b) => b.bid_amount - a.bid_amount);
+          setBids(updatedBidCollection);
         } else {
-          toast.error(data.message);
+          toast.error("Something went wrong");
         }
       });
   };
@@ -103,6 +122,66 @@ const ProductDetails = () => {
         </div>
       </div>
       {/* bids for product */}
+      <div>
+        <h2 className="text-xl font-semibold text-primary">
+          Bids For this products{" "}
+          <span className="text-secondary">{bids.length}</span>
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="table">
+            {/* head */}
+            <thead>
+              <tr>
+                <th>SL No.</th>
+                <th>Product</th>
+                <th>Seller</th>
+                <th>Bid Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bids.map((bid, i) => (
+                <tr key={bid._id}>
+                  <th>{i + 1}</th>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="avatar">
+                        <div className="mask mask-squircle h-12 w-12">
+                          <img src={productDetails?.image} alt="Product" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold">{productDetails?.title}</div>
+                        <div className="text-sm opacity-50">
+                          ${productDetails?.price_min}-
+                          {productDetails?.price_max}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="avatar">
+                      <div className="mask mask-squircle h-12 w-12">
+                        <img src={bid.bidder_image} alt="Product" />
+                      </div>
+                    </div>
+                    {bid.bidder_name}
+                    <br />
+                    <span className="badge badge-ghost badge-sm">
+                      {bid.bidder_email}
+                    </span>
+                  </td>
+                  <td>{bid.bid_amount}</td>
+                  <th>
+                    <button className="btn btn-secondary btn-xs">Accept</button>
+                    <button className="btn btn-error btn-xs">Reject</button>
+                  </th>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
