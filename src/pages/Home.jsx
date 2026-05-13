@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Hero from "../components/Hero";
 import LatestProducts from "../components/LatestProducts";
+import Loader from "../components/Loader";
 
 const Home = () => {
   const latestProductsPromise = fetch(
@@ -10,7 +11,7 @@ const Home = () => {
     <div>
       <Hero />
       <div className="text-secondary">
-        <Suspense fallback={"/loading..."}>
+        <Suspense fallback={<Loader />}>
           <LatestProducts
             latestProductsPromise={latestProductsPromise}
           ></LatestProducts>
